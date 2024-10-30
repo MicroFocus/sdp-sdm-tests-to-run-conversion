@@ -1,0 +1,32 @@
+{
+  "name": "tests-to-run-conversion-tool",
+  "version": "1.0.0",
+  "description": "JavaScript-based tool that converts the testsToRun parameter for running automated tests from OpenText Software Delivery Platform.",
+  "main": "src/main.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "ts-node src/index.ts",
+    "build": "ncc build --license licenses.txt",
+    "prepare": "husky install"
+  },
+  "keywords": [],
+  "author": "Ovidiu Stefan Popescu",
+  "contributors": [
+    {
+      "name": "Ovidiu Stefan Popescu",
+      "email": "opopescu@opentext.com"
+    }
+  ],
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^22.8.4",
+    "@types/yargs": "^17.0.33",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,css}": "prettier --write",
+    "*.{js,css,md}": "prettier --write"
+  }
+}
