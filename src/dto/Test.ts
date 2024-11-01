@@ -27,35 +27,9 @@
  * limitations under the License.
  */
 
-import Arguments from "../utils/arguments";
-
-interface Config {
-  framework: string;
-  logLevel: number;
-  customTestPattern?: string;
-  customTestDelimiter?: string;
-  customTestListPrefix?: string;
-  customTestListSuffix?: string;
+export default interface Test {
+  testName: string;
+  className: string;
+  packageName: string;
+  parameters?: { [parameterName: string]: string };
 }
-
-let config: Config = {
-  framework: "",
-  logLevel: 3,
-};
-
-const initConfig = (args: Arguments): void => {
-  config = {
-    framework: args.framework,
-    logLevel: args.logLevel,
-    customTestPattern: args.customTestPattern,
-    customTestDelimiter: args.customTestDelimiter,
-    customTestListPrefix: args.customTestListPrefix,
-    customTestListSuffix: args.customTestListSuffix,
-  };
-};
-
-const getConfig = (): Config => {
-  return config;
-};
-
-export { initConfig, getConfig };

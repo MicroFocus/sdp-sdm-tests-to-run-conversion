@@ -27,35 +27,13 @@
  * limitations under the License.
  */
 
-import Arguments from "../utils/arguments";
-
-interface Config {
-  framework: string;
-  logLevel: number;
-  customTestPattern?: string;
-  customTestDelimiter?: string;
-  customTestListPrefix?: string;
-  customTestListSuffix?: string;
+const enum Framework {
+  CucumberBDD = "bddScenario",
+  Cucumber = "cucumber",
+  Custom = "custom",
+  JUnit = "junit",
+  MavenSurefire = "mvnSurefire",
+  TestNG = "testNG",
 }
 
-let config: Config = {
-  framework: "",
-  logLevel: 3,
-};
-
-const initConfig = (args: Arguments): void => {
-  config = {
-    framework: args.framework,
-    logLevel: args.logLevel,
-    customTestPattern: args.customTestPattern,
-    customTestDelimiter: args.customTestDelimiter,
-    customTestListPrefix: args.customTestListPrefix,
-    customTestListSuffix: args.customTestListSuffix,
-  };
-};
-
-const getConfig = (): Config => {
-  return config;
-};
-
-export { initConfig, getConfig };
+export default Framework;

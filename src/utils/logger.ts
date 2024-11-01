@@ -27,6 +27,8 @@
  * limitations under the License.
  */
 
+import { getConfig } from "../config/config";
+
 enum LogLevel {
   TRACE = 1,
   DEBUG = 2,
@@ -35,8 +37,7 @@ enum LogLevel {
   ERROR = 5,
 }
 
-export class Logger {
-  private minLevel: number;
+export default class Logger {
   private module: string;
   private readonly levels: {
     [key: number]: { value: number; display: string };
@@ -50,7 +51,6 @@ export class Logger {
 
   constructor(module: string) {
     this.module = module;
-    this.minLevel = getConfig().logLevel;
   }
 
   public trace(message: string): void {
@@ -76,8 +76,9 @@ export class Logger {
    * @param message Message to log
    */
   private log(logLevel: LogLevel, message: string): void {
+    const minLevel = getConfig().logLevel;
     const level = this.getLevel(logLevel);
-    if (!level || level.value < this.minLevel) return;
+    if (!level || level.value < minLevel) return;
 
     this.emit(level.display, message);
   }

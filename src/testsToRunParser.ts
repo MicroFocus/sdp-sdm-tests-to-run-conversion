@@ -27,59 +27,59 @@
  * limitations under the License.
  */
 
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
+import Test from "./dto/Test";
 import Logger from "./utils/logger";
-import { initConfig } from "./config/config";
-import convertTestsToRun from "./testsToRunConverter";
-import parseTestsToRun from "./testsToRunParser";
-import Arguments from "./utils/arguments";
 
-const LOGGER: Logger = new Logger("main.ts");
+const LOGGER: Logger = new Logger("testsToRunParser.ts");
 
-let args: Arguments;
+const parseTestsToRun = (testsToRun: string): Test[] => {
+  let TEST_PARTS_MINIMAL_SIZE = 3;
+  let PARAMETER_SIZE = 2;
 
-const main = () => {
-  try {
-    loadArguments();
-    initConfig(args);
+  testsToRun = testsToRun.slice(testsToRun.indexOf(":") + 1);
 
-    const parsedTestsToRun = parseTestsToRun(args.testsToRun);
-    if (parseTestsToRun.length === 0) {
-      LOGGER.info("No tests to run have been found.");
-      return;
-    }
+  if (testsToRun) {
+    const testsList = testsToRun.split(";");
+    let parsedTestsToRun = new Array<Test>();
 
-    const convertedTestsToRun = convertTestsToRun(parsedTestsToRun);
+    testsList?.forEach((testToRun) => {
+      const testSplit = testToRun.split("|");
+      if (testSplit.length < TEST_PARTS_MINIMAL_SIZE) {
+        throw Error(
+          `Test '${testToRun}' does not contains all required components.`,
+        );
+      }
 
-    LOGGER.info("Successfully converted the tests to run.");
-  } catch (error) {
-    if (error instanceof Error) {
-      LOGGER.error(error.message);
-    } else {
-      throw error;
-    }
+      const testToRunData: Test = {
+        packageName: testSplit[0],
+        className: testSplit[1],
+        testName: testSplit[2],
+      };
+
+      if (testSplit.length > TEST_PARTS_MINIMAL_SIZE) {
+        testToRunData.parameters = {};
+
+        for (let i = TEST_PARTS_MINIMAL_SIZE; i < testSplit.length; i++) {
+          let paramSplit = testSplit[i].split("=");
+          if (paramSplit.length != PARAMETER_SIZE) {
+            throw Error(
+              `Expected ${PARAMETER_SIZE} parameters but only found ${paramSplit.length}`,
+            );
+          } else {
+            testToRunData.parameters[paramSplit[0]] = paramSplit[1];
+          }
+        }
+      }
+
+      LOGGER.debug(`Found test to run: ${JSON.stringify(testToRunData)}`);
+
+      parsedTestsToRun.push(testToRunData);
+    });
+
+    return parsedTestsToRun;
   }
+
+  return [];
 };
 
-const loadArguments = () => {
-  args = yargs(hideBin(process.argv))
-    .option("framework", {
-      type: "string",
-      demandOption: true,
-      describe: "Specify the framework",
-    })
-    .option("testsToRun", {
-      type: "string",
-      demandOption: true,
-      describe: "Specify the tests to run",
-    })
-    .option("logLevel", {
-      type: "number",
-      default: 3,
-      describe: "Set the log level (1-5)",
-    })
-    .parseSync() as Arguments;
-};
-
-main();
+export default parseTestsToRun;
