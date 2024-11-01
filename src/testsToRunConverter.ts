@@ -28,15 +28,17 @@
  */
 
 import { getConfig } from "./config/config";
+import parseCustomFramework from "./customFrameworkParser";
 import Framework from "./dto/Framework";
+import Replacement from "./dto/Replacement";
 import Test from "./dto/Test";
 import Logger from "./utils/logger";
 
 const LOGGER: Logger = new Logger("testsToRunConverter.ts");
 
-const CUSTOM_FRAMEWORK_PACKAGE_PLACEHOLDER = "%packageName%";
-const CUSTOM_FRAMEWORK_CLASS_PLACEHOLDER = "%className%";
-const CUSTOM_FRAMEWORK_TEST_PLACEHOLDER = "%testName%";
+const CUSTOM_FRAMEWORK_PACKAGE_PLACEHOLDER = "$package";
+const CUSTOM_FRAMEWORK_CLASS_PLACEHOLDER = "$class";
+const CUSTOM_FRAMEWORK_TEST_PLACEHOLDER = "$testName";
 
 const convertTestsToRun = (testsToRun: Test[]): string => {
   const framework = getConfig().framework;
@@ -138,27 +140,39 @@ const convertCucumberBDDTestsToRun = (testsToRun: Test[]): string => {
 const convertCustomTestsToRun = (testsToRun: Test[]): string => {
   LOGGER.info(`Converting testsToRun to a custom format...`);
 
-  const config = getConfig();
-  const customTestPattern = config.customTestPattern;
-  const customTestDelimiter = config.customTestDelimiter;
-  const customTestListPrefix = config.customTestListPrefix
-    ? config.customTestListPrefix
-    : "";
-  const customTestListSuffix = config.customTestListSuffix
-    ? config.customTestListSuffix
-    : "";
+  const customFramework = getConfig().customFramework;
+  if (!customFramework) {
+    throw new Error(
+      `Missing 'customFramework' argument for converting custom framework.`,
+    );
+  }
+  const frameworkConfig = parseCustomFramework(customFramework);
+  const customTestPattern = frameworkConfig.testPattern;
+  const customTestDelimiter = frameworkConfig.testDelimiter;
+  const customTestListPrefix = frameworkConfig.prefix || "";
+  const customTestListSuffix = frameworkConfig.suffix || "";
 
   LOGGER.debug(`Using the following test pattern: '${customTestPattern}'`);
 
   if (!customTestPattern || !customTestDelimiter) {
     throw Error(
-      "To convert the tests to run for a custom framework, the --testPattern and --testDelimiter parameters are mandatory.",
+      "To convert the tests to run for a custom framework, the testPattern and testDelimiter parameters are mandatory.",
     );
   }
 
-  let convertedTestsToRun = testsToRun
+  const allowedTestsToRun = frameworkConfig.allowDuplication
+    ? testsToRun
+    : Array.from(new Set(testsToRun.map((test) => JSON.stringify(test)))).map(
+        (test) => JSON.parse(test),
+      );
+
+  let convertedTestsToRun = allowedTestsToRun
     .map((testToRun) =>
-      replaceCustomFrameworkPlaceholders(customTestPattern, testToRun),
+      replaceCustomFrameworkPlaceholders(
+        customTestPattern,
+        testToRun,
+        frameworkConfig.replacements,
+      ),
     )
     .join(customTestDelimiter);
 
@@ -174,11 +188,73 @@ const convertCustomTestsToRun = (testsToRun: Test[]): string => {
 const replaceCustomFrameworkPlaceholders = (
   pattern: string,
   testToRun: Test,
+  replacements?: Replacement[],
 ): string => {
-  return pattern
-    .replace(CUSTOM_FRAMEWORK_PACKAGE_PLACEHOLDER, testToRun.packageName)
-    .replace(CUSTOM_FRAMEWORK_CLASS_PLACEHOLDER, testToRun.className)
-    .replace(CUSTOM_FRAMEWORK_TEST_PLACEHOLDER, testToRun.testName);
+  const packageName = applyReplacements(
+    testToRun.packageName,
+    replacements,
+    "$package",
+  );
+  const className = applyReplacements(
+    testToRun.className,
+    replacements,
+    "$class",
+  );
+  const testName = applyReplacements(
+    testToRun.testName,
+    replacements,
+    "$testName",
+  );
+
+  let result = pattern
+    .replace(CUSTOM_FRAMEWORK_PACKAGE_PLACEHOLDER, packageName)
+    .replace(CUSTOM_FRAMEWORK_CLASS_PLACEHOLDER, className)
+    .replace(CUSTOM_FRAMEWORK_TEST_PLACEHOLDER, testName);
+
+  return result;
+};
+
+const applyReplacements = (
+  input: string,
+  replacements: Replacement[] | undefined,
+  target: string,
+): string => {
+  if (!replacements) return input;
+
+  return replacements.reduce((modifiedInput, replacement) => {
+    if (replacement.target !== target) return modifiedInput;
+
+    switch (replacement.type) {
+      case "replaceString":
+        return modifiedInput.replace(
+          new RegExp(replacement.string!, "g"),
+          replacement.replacement!,
+        );
+      case "replaceRegex":
+        return modifiedInput.replace(
+          new RegExp(replacement.regex!, "g"),
+          replacement.replacement!,
+        );
+      case "replaceRegexFirst":
+        return modifiedInput.replace(
+          new RegExp(replacement.regex!),
+          replacement.replacement!,
+        );
+      case "notLatinAndDigitToOctal":
+        return modifiedInput.replace(
+          /[^a-zA-Z0-9]/g,
+          (char) => `\\${char.charCodeAt(0).toString(8)}`,
+        );
+      case "joinString":
+        return `${replacement.prefix || ""}${modifiedInput}${replacement.suffix || ""}`;
+      case "toUpperCase":
+        return modifiedInput.toUpperCase();
+      case "toLowerCase":
+        return modifiedInput.toLowerCase();
+      default:
+        return modifiedInput;
+    }
+  }, input);
 };
 
 export default convertTestsToRun;

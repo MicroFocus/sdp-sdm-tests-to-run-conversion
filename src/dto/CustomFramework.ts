@@ -27,29 +27,13 @@
  * limitations under the License.
  */
 
-import Arguments from "../utils/arguments";
+import Replacement from "./Replacement";
 
-interface Config {
-  framework: string;
-  logLevel: number;
-  customFramework?: string;
+export default interface CustomFramework {
+  testPattern: string;
+  testDelimiter: string;
+  prefix?: string;
+  suffix?: string;
+  replacements?: Replacement[];
+  allowDuplication?: boolean;
 }
-
-let config: Config = {
-  framework: "",
-  logLevel: 3,
-};
-
-const initConfig = (args: Arguments): void => {
-  config = {
-    framework: args.framework,
-    logLevel: args.logLevel,
-    customFramework: args.customFramework,
-  };
-};
-
-const getConfig = (): Config => {
-  return config;
-};
-
-export { initConfig, getConfig };

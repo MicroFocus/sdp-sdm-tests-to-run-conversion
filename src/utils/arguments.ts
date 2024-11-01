@@ -31,8 +31,5 @@ export default interface Arguments {
   framework: string;
   testsToRun: string;
   logLevel: number;
-  customTestPattern?: string;
-  customTestDelimiter?: string;
-  customTestListPrefix?: string;
-  customTestListSuffix?: string;
+  customFramework?: string;
 }
