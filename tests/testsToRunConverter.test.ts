@@ -118,20 +118,63 @@ describe("Conversion Tests", () => {
     expect(actualResult).toBe(expectedResult);
   });
 
-  it("Test custom conversion with single test", () => {
+  it("Converts single test with custom format, prefix, suffix, and replacements", () => {
     const expectedResult =
-      "start:com.example.app.CalculatorTest#testAdd_whenPositiveNumbers:end";
+      "start:test:com.example.app.calculatortest_renamedNUMand123.java.mytest#TESTADD\\137WHENPOSITIVENUMBERS:end";
     const testsToRun =
-      "v1:com.example.app|CalculatorTest|testAdd_whenPositiveNumbers";
+      "v1:com.example.app|CalculatorTest234and123.java.java|testAdd_whenPositiveNumbers";
+
+    const customFramework = JSON.stringify({
+      testPattern: "$package.$class#$testName",
+      testDelimiter: ";",
+      prefix: "start:",
+      suffix: ":end",
+      replacements: [
+        {
+          type: "replaceString",
+          target: "$class",
+          string: "CalculatorTest",
+          replacement: "CalculatorTest_RENAMED",
+        },
+        {
+          type: "replaceRegex",
+          target: "$class",
+          regex: ".java$",
+          replacement: ".mytest",
+        },
+        {
+          type: "toUpperCase",
+          target: "$testName",
+        },
+        {
+          type: "toLowerCase",
+          target: "$class",
+        },
+        {
+          type: "joinString",
+          target: "$package",
+          suffix: "",
+          prefix: "test:",
+        },
+        {
+          type: "notLatinAndDigitToOctal",
+          target: "$testName",
+        },
+        {
+          type: "replaceRegexFirst",
+          target: "$class",
+          regex: "[0-9]+",
+          replacement: "NUM",
+        },
+      ],
+      allowDuplication: true,
+    });
 
     const args: Arguments = {
       testsToRun: testsToRun,
       logLevel: 1,
       framework: "custom",
-      customTestPattern: "%packageName%.%className%#%testName%",
-      customTestDelimiter: ";",
-      customTestListPrefix: "start:",
-      customTestListSuffix: ":end",
+      customFramework: customFramework,
     };
     initConfig(args);
 
@@ -141,20 +184,37 @@ describe("Conversion Tests", () => {
     expect(actualResult).toBe(expectedResult);
   });
 
-  it("Test custom conversion with multiple tests", () => {
+  it("Converts multiple tests with custom format, prefix, suffix, and replacements", () => {
     const expectedResult =
-      "start:com.example.app.CalculatorTest#testAdd_whenPositiveNumbers;com.example.app.CalculatorTest#testAdd_whenNegativeNumbers;com.example.app.CalculatorTest#testSub_whenPositiveNumbers;com.example.app.BooleanCalculatorTest#testOr_whenOneTrue;com.example.app.BooleanCalculatorTest#testAnd_whenBothTrue:end";
+      "start:com.example.app.CalculatorTest_RENAMED#TESTADD_WHENPOSITIVENUMBERS;com.example.app.CalculatorTest_RENAMED#TESTADD_WHENNEGATIVENUMBERS;com.example.app.CalculatorTest_RENAMED#TESTSUB_WHENPOSITIVENUMBERS;com.example.app.BooleanCalculatorTest_RENAMED#TESTOR_WHENONETRUE;com.example.app.BooleanCalculatorTest_RENAMED#TESTAND_WHENBOTHTRUE:end";
     const testsToRun =
       "v1:com.example.app|CalculatorTest|testAdd_whenPositiveNumbers;com.example.app|CalculatorTest|testAdd_whenNegativeNumbers;com.example.app|CalculatorTest|testSub_whenPositiveNumbers;com.example.app|BooleanCalculatorTest|testOr_whenOneTrue;com.example.app|BooleanCalculatorTest|testAnd_whenBothTrue";
+
+    const customFramework = JSON.stringify({
+      testPattern: "$package.$class#$testName",
+      testDelimiter: ";",
+      prefix: "start:",
+      suffix: ":end",
+      replacements: [
+        {
+          type: "replaceString",
+          target: "$class",
+          string: "CalculatorTest",
+          replacement: "CalculatorTest_RENAMED",
+        },
+        {
+          type: "toUpperCase",
+          target: "$testName",
+        },
+      ],
+      allowDuplication: true,
+    });
 
     const args: Arguments = {
       testsToRun: testsToRun,
       logLevel: 1,
       framework: "custom",
-      customTestPattern: "%packageName%.%className%#%testName%",
-      customTestDelimiter: ";",
-      customTestListPrefix: "start:",
-      customTestListSuffix: ":end",
+      customFramework: customFramework,
     };
     initConfig(args);
 
