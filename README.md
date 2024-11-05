@@ -23,4 +23,8 @@ This is a command-line tool desinged to convert a list of test details received 
 
 ## 4. Getting Started
 
-...
+### 4.1. Running the tool
+
+```bash
+node dist/index.js --framework="<framework_name>" --testsToRun="<test_definitions>" --logLevel=<level>
+```
