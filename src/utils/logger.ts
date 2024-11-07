@@ -30,6 +30,7 @@
 import { getConfig } from "../config/config";
 
 enum LogLevel {
+  DISABLED = 0,
   TRACE = 1,
   DEBUG = 2,
   INFO = 3,
@@ -78,7 +79,7 @@ export default class Logger {
   private log(logLevel: LogLevel, message: string): void {
     const minLevel = getConfig().logLevel;
     const level = this.getLevel(logLevel);
-    if (!level || level.value < minLevel) return;
+    if (!level || minLevel === LogLevel.DISABLED || level.value < minLevel) return;
 
     this.emit(level.display, message);
   }

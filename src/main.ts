@@ -51,6 +51,7 @@ const main = () => {
     }
 
     const convertedTestsToRun = convertTestsToRun(parsedTestsToRun);
+    console.log(convertedTestsToRun);
 
     LOGGER.info("Successfully converted the tests to run.");
   } catch (error) {
@@ -76,7 +77,7 @@ const loadArguments = () => {
     })
     .option("logLevel", {
       type: "number",
-      default: 3,
+      default: 0,
       describe: "Set the log level (1-5)",
     })
     .parseSync() as Arguments;
