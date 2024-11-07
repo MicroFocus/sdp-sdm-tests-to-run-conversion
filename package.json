@@ -1,6 +1,6 @@
 {
   "name": "tests-to-run-conversion-tool",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "JavaScript-based tool that converts the testsToRun parameter for running automated tests from OpenText Software Delivery Platform.",
   "main": "src/main.ts",
   "scripts": {
