@@ -77,6 +77,11 @@ const loadArguments = () => {
       demandOption: true,
       describe: "Specify the tests to run",
     })
+    .option("customFramework", {
+      type: "string",
+      default: "",
+      describe: "JSON object containing the format rules used for conversion",
+    })
     .option("logLevel", {
       type: "number",
       default: 0,
