@@ -12,7 +12,20 @@
     "build": "npx ncc build src/main.ts -o dist --license licenses.txt",
     "prepare": "husky install"
   },
-  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MicroFocus/tests-to-run-conversion-tool.git"
+  },
+  "keywords": [
+    "testsToRun",
+    "convertor",
+    "github",
+    "actions",
+    "alm",
+    "octane",
+    "valueedge",
+    "opentext"
+  ],
   "author": "Ovidiu Stefan Popescu",
   "contributors": [
     {

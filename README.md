@@ -33,7 +33,7 @@ The tool supports the following test frameworks out-of-the-box, as well as custo
 - Cucumber with BDD Scenario
 - JUnit
 - Maven Surefire
-- TestNG
+- TestNG (Selenium)
 - Custom (define your custom framework configuration - [see more](#5-custom-framework))
 
 ---
@@ -58,7 +58,7 @@ npx @opentext/tests-to-run-conversion-tool --framework="<framework_name>" --test
 2. `--framework` - the framework to which the `--testsToRun` parameter will be converted. Available options are:
    - JUnit: `junit`
    - Maven Surefire: `mvnSurefire`
-   - TestNG: `testNG`
+   - TestNG (Selenium): `testNG`
    - Cucumber: `cucumber`
    - Cucumber - BDD scenario: `bddScenario`
    - Custom framework: `custom`
