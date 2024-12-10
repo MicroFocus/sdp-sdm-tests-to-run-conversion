@@ -1,6 +1,8 @@
 ## 1. Introduction 🚀
 
-This is a command-line tool desinged to convert a list of test details received from **OpenText Core Software Delivery Platform** to a format accepted by common frameworks. The tool allows defining custom conversion flow for other frameworks that are not supported by default.
+In the following documentation, the **OpenText Core Software Delivery Platform** and **OpenText Software Delivery Management** will collectively be referred to as 'the product'.
+
+This is a command-line tool desinged to convert a list of test details received from **the product** to a format accepted by common frameworks. The tool allows defining custom conversion flow for other frameworks that are not supported by default.
 
 ---
 
@@ -20,6 +22,7 @@ This is a command-line tool desinged to convert a list of test details received 
   - [5.2. Simple Example](#52-simple-example)
   - [5.3. Optional Keys](#53-optional-keys)
   - [5.4. Complex Example](#54-complex-example)
+- [6. Change log](#6-change-log)
 
 ---
 
@@ -44,17 +47,17 @@ The tool supports the following test frameworks out-of-the-box, as well as custo
 
 #### 4.1.1. Run using NPX
 
-The tool have been released as a NPX command: [@opentext/tests-to-run-conversion-tool](https://www.npmjs.com/package/@opentext/tests-to-run-conversion-tool)
+The tool have been released as a NPX command: [@opentext/sdp-sdm-tests-to-run-conversion](https://www.npmjs.com/package/@opentext/sdp-sdm-tests-to-run-conversion)
 
-Run the following command to convert the value of the `--testsToRun` parameter received from **OpenText Core Software Delivery Platform** to a format specified by the `--framework` parameter.
+Run the following command to convert the value of the `--testsToRun` parameter received from **the product** to a format specified by the `--framework` parameter.
 
 ```bash
-npx @opentext/tests-to-run-conversion-tool --framework="<framework_name>" --testsToRun="<test_definitions>" [--customFramework="<json_format_rules>"]
+npx @opentext/sdp-sdm-tests-to-run-conversion --framework="<framework_name>" --testsToRun="<test_definitions>" [--customFramework="<json_format_rules>"]
 ```
 
 #### 4.1.2. Parameters
 
-1. `--testsToRun` - a list of automated tests to run, usualy received from **OpenText Core Software Delivery Platform**.
+1. `--testsToRun` - a list of automated tests to run, usualy received from **the product**.
 2. `--framework` - the framework to which the `--testsToRun` parameter will be converted. Available options are:
    - JUnit: `junit`
    - Maven Surefire: `mvnSurefire`
@@ -76,7 +79,7 @@ npx @opentext/tests-to-run-conversion-tool --framework="<framework_name>" --test
 
 ### 4.2. Running the tool with GitHub Actions
 
-This example workflow demonstrates how to integrate a test conversion tool (`@opentext/tests-to-run-conversion-tool`) into a GitHub Actions pipeline to determine and execute specific tests dynamically. In the following example, the workflow will run some automated tests using the **Maven Surefire** framework.
+This example workflow demonstrates how to integrate a test conversion tool (`@opentext/sdp-sdm-tests-to-run-conversion`) into a GitHub Actions pipeline to determine and execute specific tests dynamically. In the following example, the workflow will run some automated tests using the **Maven Surefire** framework.
 
 #### Workflow Overview
 
@@ -109,7 +112,7 @@ jobs:
         id: convert_tests
         run: |
           # Run the npx command and capture its output
-          output=$(npx @opentext/tests-to-run-conversion-tool --framework="junit" --testsToRun="${{ github.event.inputs.testsToRun }}" --logLevel=0)
+          output=$(npx @opentext/sdp-sdm-tests-to-run-conversion --framework="junit" --testsToRun="${{ github.event.inputs.testsToRun }}" --logLevel=0)
 
           # Save the output to an environment variable
           echo "converted_tests=$output" >> $GITHUB_ENV
@@ -122,9 +125,9 @@ jobs:
           distribution: "temurin"
           java-version: "21"
 
-      # Step 3: Run the tests
+      # Step 3: Run the tests from the converted list
       - name: Run JUnit Tests
-        run: mvn test -Dtest=${{ steps.convert_tests.outputs.converted_tests }}
+        run: mvn test -Dtest="$converted_tests"
 ```
 
 ---
@@ -272,3 +275,9 @@ Using the same JUnit report structure, if you need to adjust the format of the c
 
 > [!NOTE]
 > When specifying escape characters in the JSON, ensure that each escape character is doubled (e.g., \\\\ instead of \\).
+
+## 6. Change log
+
+### v25.1.0
+
+- Converts the `testsToRun` parameter to a format accepted by a specific framework.
