@@ -8,7 +8,7 @@ This is a command-line tool desinged to convert a list of test details received 
 
 ## 2. Table of Contents
 
-- [1. Introduction](#1-introduction)
+- [1. Introduction](#1-introduction-)
 - [2. Table of Contents](#2-table-of-contents)
 - [3. Description](#3-description)
   - [3.1. Supported Frameworks](#31-supported-frameworks)
