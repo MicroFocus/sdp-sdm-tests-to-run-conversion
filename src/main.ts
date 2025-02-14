@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
- * Copyright 2016-2024 Open Text.
+ * Copyright 2016-2025 Open Text.
  *
  * The only warranties for products and services of Open Text and
  * its affiliates and licensors (“Open Text”) are as may be set forth

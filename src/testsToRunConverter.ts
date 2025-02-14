@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Open Text.
+ * Copyright 2016-2025 Open Text.
  *
  * The only warranties for products and services of Open Text and
  * its affiliates and licensors (“Open Text”) are as may be set forth
@@ -27,12 +27,14 @@
  * limitations under the License.
  */
 
+import { js2xml } from "xml-js";
 import { getConfig } from "./config/config";
 import parseCustomFramework from "./customFrameworkParser";
 import Framework from "./dto/Framework";
 import Replacement from "./dto/Replacement";
 import Test from "./dto/Test";
 import Logger from "./utils/logger";
+import UftTestParameter from "./dto/uft/UftTestParameter";
 
 const LOGGER: Logger = new Logger("testsToRunConverter.ts");
 
@@ -55,10 +57,14 @@ const convertTestsToRun = (testsToRun: Test[]): string => {
       return convertCucumberTestsToRun(testsToRun);
     case Framework.CucumberBDD:
       return convertCucumberBDDTestsToRun(testsToRun);
+    case Framework.UFT:
+      return convertUftTestsToRun(testsToRun);
     case Framework.Custom:
       return convertCustomTestsToRun(testsToRun);
     default:
-      throw Error(`Unsupported framework: ${framework}`);
+      throw Error(
+        `Unsupported framework: '${framework}'. See the list of available parameters at https://github.com/MicroFocus/sdp-sdm-tests-to-run-conversion?tab=readme-ov-file#412-parameters.`,
+      );
   }
 };
 
@@ -129,6 +135,50 @@ const convertCucumberBDDTestsToRun = (testsToRun: Test[]): string => {
     .join(" ");
 
   const convertedTestsToRun = `${convertedFeatures} ${convertedTests}`;
+
+  LOGGER.debug(
+    `Successfully converted the tests to run: ${convertedTestsToRun}`,
+  );
+
+  return convertedTestsToRun;
+};
+
+const convertUftTestsToRun = (testsToRun: Test[]): string => {
+  LOGGER.info(`Converting testsToRun to UFT One format...`);
+  const uftTestsToRun = testsToRun.map((testToRun) => {
+    let parameters: UftTestParameter[] = [];
+    if (testToRun.parameters) {
+      Object.entries(testToRun.parameters).forEach(([key, value]) => {
+        parameters.push({
+          _attributes: {
+            name: key,
+            value: value,
+            type: "string",
+          },
+        });
+      });
+    }
+
+    return {
+      _attributes: {
+        name: testToRun.testName,
+        path:
+          testToRun.className.replace("file:///", "") +
+          "/" +
+          testToRun.testName,
+      },
+      parameter: parameters,
+    };
+  });
+
+  const convertedTestsToRun = js2xml(
+    {
+      mtbx: {
+        test: uftTestsToRun,
+      },
+    },
+    { compact: true },
+  );
 
   LOGGER.debug(
     `Successfully converted the tests to run: ${convertedTestsToRun}`,

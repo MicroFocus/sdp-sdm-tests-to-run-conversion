@@ -37,6 +37,7 @@ The tool supports the following test frameworks out-of-the-box, as well as custo
 - JUnit
 - Maven Surefire
 - TestNG (Selenium)
+- OpenText Functional Testing
 - Custom (define your custom framework configuration - [see more](#5-custom-framework))
 
 ---
@@ -64,6 +65,7 @@ npx @opentext/sdp-sdm-tests-to-run-conversion --framework="<framework_name>" --t
    - TestNG (Selenium): `testNG`
    - Cucumber: `cucumber`
    - Cucumber - BDD scenario: `bddScenario`
+   - OpenText Functional Testing: `uft`
    - Custom framework: `custom`
 3. `--customFramework` _(optional)_ - a JSON object serialized to string which contains the format rules used for conversion. To configure a custom framework see the section [5. Custom Framework](#5-custom-framework).
 4. `--logLevel` _(optional)_ - the level to log at. The available options are:
@@ -277,6 +279,10 @@ Using the same JUnit report structure, if you need to adjust the format of the c
 > When specifying escape characters in the JSON, ensure that each escape character is doubled (e.g., \\\\ instead of \\).
 
 ## 6. Change log
+
+### v25.2.0
+
+- Added support for OpenText Functional Testing.
 
 ### v25.1.0
 

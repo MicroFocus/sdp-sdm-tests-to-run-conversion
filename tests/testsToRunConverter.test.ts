@@ -223,4 +223,42 @@ describe("Conversion Tests", () => {
 
     expect(actualResult).toBe(expectedResult);
   });
+
+  it("Test UFT One conversion with single test", () => {
+    const expectedResult =
+      '<mtbx><test name="GUITest06" path="C:/dev/actions-runner/_work/alm-octane-github-actions-tests/alm-octane-github-actions-tests/GUITests/f1/GUITest06"><parameter name="runId" value="5073" type="string"/></test></mtbx>';
+    const testsToRun =
+      "v1:FTToolsLauncher|file:///C:/dev/actions-runner/_work/alm-octane-github-actions-tests/alm-octane-github-actions-tests/GUITests/f1|GUITest06|runId=5073";
+
+    const args: Arguments = {
+      testsToRun: testsToRun,
+      logLevel: 1,
+      framework: "uft",
+    };
+    initConfig(args);
+
+    const parsedTestsToRun = parseTestsToRun(testsToRun);
+    const actualResult = convertTestsToRun(parsedTestsToRun);
+
+    expect(actualResult).toBe(expectedResult);
+  });
+
+  it("Test UFT One conversion with multiple tests", () => {
+    const expectedResult =
+      '<mtbx><test name="GUITest06" path="C:/dev/actions-runner/_work/alm-octane-github-actions-tests/alm-octane-github-actions-tests/GUITests/f1/GUITest06"><parameter name="runId" value="5073" type="string"/></test><test name="GUITest1" path="C:/dev/actions-runner/_work/alm-octane-github-actions-tests/alm-octane-github-actions-tests/GUITest1"><parameter name="runId" value="5074" type="string"/></test></mtbx>';
+    const testsToRun =
+      "v1:FTToolsLauncher|file:///C:/dev/actions-runner/_work/alm-octane-github-actions-tests/alm-octane-github-actions-tests/GUITests/f1|GUITest06|runId=5073;FTToolsLauncher|file:///C:/dev/actions-runner/_work/alm-octane-github-actions-tests/alm-octane-github-actions-tests|GUITest1|runId=5074";
+
+    const args: Arguments = {
+      testsToRun: testsToRun,
+      logLevel: 1,
+      framework: "uft",
+    };
+    initConfig(args);
+
+    const parsedTestsToRun = parseTestsToRun(testsToRun);
+    const actualResult = convertTestsToRun(parsedTestsToRun);
+
+    expect(actualResult).toBe(expectedResult);
+  });
 });

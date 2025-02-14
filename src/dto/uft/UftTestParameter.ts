@@ -27,13 +27,10 @@
  * limitations under the License.
  */
 
-import Replacement from "./Replacement";
-
-export default interface CustomFramework {
-  testPattern: string;
-  testDelimiter: string;
-  prefix?: string;
-  suffix?: string;
-  replacements?: Replacement[];
-  allowDuplication?: boolean;
+export default interface UftTestParameter {
+  _attributes: {
+    name: string;
+    value: string;
+    type: string;
+  };
 }
