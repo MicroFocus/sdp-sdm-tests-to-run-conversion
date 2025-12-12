@@ -44,7 +44,9 @@ const initConfig = (args: Arguments): void => {
   config = {
     framework: args.framework,
     logLevel: args.logLevel,
-    customFramework: args.customFramework,
+    customFramework: args.customFramework
+      ? Buffer.from(args.customFramework, "base64").toString("utf-8")
+      : undefined,
   };
 };
 

@@ -22,6 +22,7 @@ This is a command-line tool desinged to convert a list of test details received 
   - [5.2. Simple Example](#52-simple-example)
   - [5.3. Optional Keys](#53-optional-keys)
   - [5.4. Complex Example](#54-complex-example)
+    - [5.4.1. Selenium with C# Example](#541-selenium-with-c-example)
 - [6. Change log](#6-change-log)
 
 ---
@@ -277,6 +278,21 @@ Using the same JUnit report structure, if you need to adjust the format of the c
 
 > [!NOTE]
 > When specifying escape characters in the JSON, ensure that each escape character is doubled (e.g., \\\\ instead of \\).
+
+#### 5.4.1. Selenium with C# Example
+
+To generate the format expected by Selenium tests written in a C# project, use the following custom configuration:
+
+```json
+{
+  "testPattern": "FullyQualifiedName~$testName",
+  "testDelimiter": "|",
+  "allowDuplication": false
+}
+```
+
+> [!NOTE]
+> This argument needs to be encoded to base64 in order to be used.
 
 ## 6. Change log
 

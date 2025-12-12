@@ -174,7 +174,7 @@ describe("Conversion Tests", () => {
       testsToRun: testsToRun,
       logLevel: 1,
       framework: "custom",
-      customFramework: customFramework,
+      customFramework: Buffer.from(customFramework).toString("base64"),
     };
     initConfig(args);
 
@@ -214,7 +214,7 @@ describe("Conversion Tests", () => {
       testsToRun: testsToRun,
       logLevel: 1,
       framework: "custom",
-      customFramework: customFramework,
+      customFramework: Buffer.from(customFramework).toString("base64"),
     };
     initConfig(args);
 
