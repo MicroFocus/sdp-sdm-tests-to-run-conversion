@@ -296,6 +296,10 @@ To generate the format expected by Selenium tests written in a C# project, use t
 
 ## 6. Change log
 
+### v26.1.0
+
+- The `customFramework` argument should be encoded before running the tool in order to avoid issues with special characters.
+
 ### v25.2.0
 
 - Added support for OpenText Functional Testing.

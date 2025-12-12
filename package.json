@@ -1,6 +1,6 @@
 {
   "name": "@opentext/sdp-sdm-tests-to-run-conversion",
-  "version": "25.2.0",
+  "version": "26.1.0",
   "description": "JavaScript-based tool that converts the testsToRun parameter for running automated tests from OpenText Core Software Delivery Platform and OpenText Software Delivery Management.",
   "main": "./dist/index.js",
   "bin": {
