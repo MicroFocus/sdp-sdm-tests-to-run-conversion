@@ -41,6 +41,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^22.8.4",
+    "@types/q": "^1.5.8",
     "@types/yargs": "^17.0.33",
     "@vercel/ncc": "^0.38.2",
     "husky": "^8.0.0",
@@ -55,6 +56,11 @@
     "*.{js,css,md}": "prettier --write"
   },
   "dependencies": {
+    "@microfocus/alm-octane-js-rest-sdk": "^25.4.0",
+    "@xmldom/xmldom": "^0.8.11",
+    "azure-pipelines-task-lib": "^5.2.2",
+    "cfb": "^1.2.2",
+    "isomorphic-git": "^1.35.0",
     "xml-js": "^1.6.11",
     "yargs": "^17.7.2"
   }
