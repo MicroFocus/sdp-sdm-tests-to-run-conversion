@@ -36,45 +36,111 @@ import { initConfig } from "./config/config";
 import convertTestsToRun from "./testsToRunConverter";
 import parseTestsToRun from "./testsToRunParser";
 import Arguments from "./utils/arguments";
+import Discovery from "./discovery/Discovery";
+import tl = require("azure-pipelines-task-lib");
+import { verifyPath } from "./utils/utils";
 
 const LOGGER: Logger = new Logger("main.ts");
 
 let args: Arguments;
 
-const main = () => {
+const main = async () => {
   try {
     loadArguments();
     initConfig(args);
 
-    const parsedTestsToRun = parseTestsToRun(args.testsToRun);
-    if (parseTestsToRun.length === 0) {
-      LOGGER.info("No tests to run have been found.");
-      return;
+    const actionType = args.action;
+    const isFullScan = args.isFullScan;
+    const path = args.path;
+    const octaneUrl = args.octaneUrl;
+    const sharedSpace = args.sharedSpace;
+    const workspace = args.workspace;
+    const clientId = args.clientId;
+    const clientSecret = args.clientSecret;
+
+    if (!actionType) {
+      tl.setResult(
+        tl.TaskResult.Failed,
+        "You have to specify an action to execute: convertTests or discoverTests.",
+      );
     }
 
-    const convertedTestsToRun = convertTestsToRun(parsedTestsToRun);
-    console.log(convertedTestsToRun);
-
-    LOGGER.info("Successfully converted the tests to run.");
+    if (actionType === "convertTests") {
+      convertTests();
+    } else if (actionType === "discoverTests") {
+      await verifyPath(path);
+      if (
+        !path &&
+        !isFullScan &&
+        !octaneUrl &&
+        !sharedSpace &&
+        !workspace &&
+        !clientId &&
+        !clientSecret
+      ) {
+        tl.setResult(
+          tl.TaskResult.Failed,
+          "You have to specify all Octane connection parameters, the path to the repository to discover UFT tests from and whether full scan or sync is required.",
+        );
+        return;
+      }
+      await discoverTests(
+        path,
+        isFullScan,
+        octaneUrl,
+        sharedSpace,
+        workspace,
+        clientId,
+        clientSecret,
+      );
+    }
   } catch (error) {
-    if (error instanceof Error) {
-      LOGGER.error(error.message);
-    } else {
-      throw error;
-    }
+    tl.setResult(tl.TaskResult.Failed, (error as Error).message);
   }
+};
+
+const discoverTests = async (
+  path: string,
+  isFullScan: boolean,
+  octaneUrl: string,
+  sharedSpace: string,
+  workspace: string,
+  clientId: string,
+  clientSecret: string,
+) => {
+  const discovery = new Discovery(
+    isFullScan,
+    octaneUrl,
+    sharedSpace,
+    workspace,
+    clientId,
+    clientSecret,
+  );
+  await discovery.startDiscovery(path);
+};
+
+const convertTests = () => {
+  const parsedTestsToRun = parseTestsToRun(args.testsToRun);
+  if (parseTestsToRun.length === 0) {
+    LOGGER.error("No tests to run have been found.");
+    return;
+  }
+
+  const convertedTests = convertTestsToRun(parsedTestsToRun);
+  tl.setVariable("testsToRunConverted", convertedTests);
+  console.log("The converted tests ", convertedTests);
 };
 
 const loadArguments = () => {
   args = yargs(hideBin(process.argv))
     .option("framework", {
       type: "string",
-      demandOption: true,
+      demandOption: false,
       describe: "Specify the framework",
     })
     .option("testsToRun", {
       type: "string",
-      demandOption: true,
+      demandOption: false,
       describe: "Specify the tests to run",
     })
     .option("customFramework", {
@@ -86,6 +152,47 @@ const loadArguments = () => {
       type: "number",
       default: 0,
       describe: "Set the log level (1-5)",
+    })
+    .option("action", {
+      type: "string",
+      demandOption: true,
+      default: "convertTests",
+      describe:
+        "Specify the action you want to execute, convertTests or discoverTests",
+    })
+    .option("isFullScan", {
+      type: "boolean",
+      demandOption: false,
+      describe: "Specify whether full scan or sync is required",
+    })
+    .option("path", {
+      type: "string",
+      default: "Specify the path to the repository to discover UFT tests from",
+    })
+    .option("octaneUrl", {
+      type: "string",
+      default: "",
+      describe: "Specify the Octane server URL",
+    })
+    .option("sharedSpace", {
+      type: "string",
+      default: "",
+      describe: "Specify the Octane shared space id",
+    })
+    .option("workspace", {
+      type: "string",
+      default: "",
+      describe: "Specify the Octane workspace id",
+    })
+    .option("clientId", {
+      type: "string",
+      default: "",
+      describe: "Specify the Octane client id",
+    })
+    .option("clientSecret", {
+      type: "string",
+      default: "",
+      describe: "Specify the Octane client secret",
     })
     .parseSync() as Arguments;
 };
