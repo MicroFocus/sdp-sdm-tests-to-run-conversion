@@ -56,7 +56,7 @@ export default class ScanRepo {
         );
         this.tests.push(foundApiTests);
       } else {
-        for (const item of items) {
+        const subDirPromises = items.map(async (item) => {
           const itemPath = path.join(pathToRepo, item);
           const stats = await fs.promises.lstat(itemPath);
           if (stats.isDirectory() || stats.isSymbolicLink()) {
@@ -64,11 +64,12 @@ export default class ScanRepo {
               LOGGER.warn(
                 `${itemPath} is a symlink and symlinks are not supported and will be ignored.`,
               );
-              continue;
+              return;
             }
             await this.scanRepo(itemPath);
           }
-        }
+        });
+        await Promise.all(subDirPromises);
       }
     } catch (e) {
       throw new Error("Error while scanning the repo: " + (e as Error).message);
