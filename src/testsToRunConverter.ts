@@ -28,13 +28,14 @@
  */
 
 import { js2xml } from "xml-js";
-import { getConfig } from "./config/config";
 import parseCustomFramework from "./customFrameworkParser";
 import Framework from "./dto/Framework";
 import Replacement from "./dto/Replacement";
 import Test from "./dto/Test";
 import Logger from "./utils/logger";
 import UftTestParameter from "./dto/uft/UftTestParameter";
+import ExternalDataTable from "./dto/uft/ExternalDataTable";
+import ConvertedUftTest from "./dto/uft/ConvertedUftTests";
 
 const LOGGER: Logger = new Logger("testsToRunConverter.ts");
 
@@ -42,8 +43,12 @@ const CUSTOM_FRAMEWORK_PACKAGE_PLACEHOLDER = "$package";
 const CUSTOM_FRAMEWORK_CLASS_PLACEHOLDER = "$class";
 const CUSTOM_FRAMEWORK_TEST_PLACEHOLDER = "$testName";
 
-const convertTestsToRun = (testsToRun: Test[]): string => {
-  const framework = getConfig().framework;
+const convertTestsToRun = (
+  testsToRun: Test[],
+  framework: string,
+  rootDirectory: string,
+  customFramework?: string,
+): string => {
   if (!framework) {
     throw Error("Could not get framework from config.");
   }
@@ -58,9 +63,14 @@ const convertTestsToRun = (testsToRun: Test[]): string => {
     case Framework.CucumberBDD:
       return convertCucumberBDDTestsToRun(testsToRun);
     case Framework.UFT:
-      return convertUftTestsToRun(testsToRun);
+      return convertUftTestsToRun(testsToRun, rootDirectory);
     case Framework.Custom:
-      return convertCustomTestsToRun(testsToRun);
+      if (!customFramework) {
+        throw new Error(
+          "Missing 'customFramework' argument for converting custom framework.",
+        );
+      }
+      return convertCustomTestsToRun(testsToRun, customFramework);
     default:
       throw Error(
         `Unsupported framework: '${framework}'. See the list of available parameters at https://github.com/MicroFocus/sdp-sdm-tests-to-run-conversion?tab=readme-ov-file#412-parameters.`,
@@ -143,32 +153,47 @@ const convertCucumberBDDTestsToRun = (testsToRun: Test[]): string => {
   return convertedTestsToRun;
 };
 
-const convertUftTestsToRun = (testsToRun: Test[]): string => {
+const convertUftTestsToRun = (
+  testsToRun: Test[],
+  rootDirectory: string,
+): string => {
   LOGGER.info(`Converting testsToRun to UFT One format...`);
+
   const uftTestsToRun = testsToRun.map((testToRun) => {
     let parameters: UftTestParameter[] = [];
+    let externalDataTable: ExternalDataTable | undefined;
     if (testToRun.parameters) {
       Object.entries(testToRun.parameters).forEach(([key, value]) => {
-        parameters.push({
-          _attributes: {
-            name: key,
-            value: value,
-            type: "string",
-          },
-        });
+        if (key === "dataTable") {
+          value = value.replace(/\//g, "\\");
+          externalDataTable = {
+            _attributes: {
+              path: rootDirectory + "\\" + value,
+            },
+          };
+        } else {
+          parameters.push({
+            _attributes: {
+              name: key,
+              value: value,
+              type: "string",
+            },
+          });
+        }
       });
     }
 
-    return {
+    const convertedTests: ConvertedUftTest = {
       _attributes: {
         name: testToRun.testName,
-        path:
-          testToRun.className.replace("file:///", "") +
-          "/" +
-          testToRun.testName,
+        path: rootDirectory + "\\" + testToRun.className.replace(/\//g, "\\"),
       },
       parameter: parameters,
     };
+    if (externalDataTable) {
+      convertedTests.DataTable = externalDataTable;
+    }
+    return convertedTests;
   });
 
   const convertedTestsToRun = js2xml(
@@ -187,10 +212,12 @@ const convertUftTestsToRun = (testsToRun: Test[]): string => {
   return convertedTestsToRun;
 };
 
-const convertCustomTestsToRun = (testsToRun: Test[]): string => {
+const convertCustomTestsToRun = (
+  testsToRun: Test[],
+  customFramework: string,
+): string => {
   LOGGER.info(`Converting testsToRun to a custom format...`);
 
-  const customFramework = getConfig().customFramework;
   if (!customFramework) {
     throw new Error(
       `Missing 'customFramework' argument for converting custom framework.`,

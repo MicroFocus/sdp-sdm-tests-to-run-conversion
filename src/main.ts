@@ -32,13 +32,12 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import Logger from "./utils/logger";
-import { initConfig } from "./config/config";
-import convertTestsToRun from "./testsToRunConverter";
-import parseTestsToRun from "./testsToRunParser";
+import { getConfig, initConfig } from "./config/config";
 import Arguments from "./utils/arguments";
 import Discovery from "./discovery/Discovery";
 import tl = require("azure-pipelines-task-lib");
 import { verifyPath } from "./utils/utils";
+import { convertTests } from "./index";
 
 const LOGGER: Logger = new Logger("main.ts");
 
@@ -66,8 +65,18 @@ const main = async () => {
     }
 
     if (actionType === "convertTests") {
-      convertTests();
+      const framework = getConfig().framework;
+      const rootDirectory = process.env.BUILD_SOURCESDIRECTORY || "";
+      const convertedTests = convertTests(
+        args.testsToRun,
+        framework,
+        rootDirectory,
+      );
+      if (convertedTests) {
+        tl.setVariable("testsToRunConverted", convertedTests);
+      }
     } else if (actionType === "discoverTests") {
+      LOGGER.info("The path is: " + path);
       await verifyPath(path);
       if (
         !path &&
@@ -117,18 +126,6 @@ const discoverTests = async (
     clientSecret,
   );
   await discovery.startDiscovery(path);
-};
-
-const convertTests = () => {
-  const parsedTestsToRun = parseTestsToRun(args.testsToRun);
-  if (parseTestsToRun.length === 0) {
-    LOGGER.error("No tests to run have been found.");
-    return;
-  }
-
-  const convertedTests = convertTestsToRun(parsedTestsToRun);
-  tl.setVariable("testsToRunConverted", convertedTests);
-  console.log("The converted tests ", convertedTests);
 };
 
 const loadArguments = () => {
