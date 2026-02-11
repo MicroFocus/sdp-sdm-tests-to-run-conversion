@@ -2,15 +2,30 @@
   "name": "@opentext/sdp-sdm-tests-to-run-conversion",
   "version": "26.1.0",
   "description": "JavaScript-based tool that converts the testsToRun parameter for running automated tests from OpenText Core Software Delivery Platform and OpenText Software Delivery Management.",
-  "main": "./dist/index.js",
-  "bin": {
-    "sdp-sdm-tests-to-run-conversion": "./dist/index.js"
+  "main": "./dist/main.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
+  "bin": {
+    "sdp-sdm-tests-to-run-conversion": "./dist/cli/main.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "jest",
-    "run": "node dist/index.js",
-    "build": "npx ncc build src/main.ts -o dist --license licenses.txt",
-    "prepare": "husky install"
+    "build:lib": "tsc",
+    "build:task": "npx ncc build src/main.ts -o dist/cli --license licenses.txt",
+    "build": "npm run build:lib && npm run build:task",
+    "prepare": "husky install",
+    "run": "node dist/index.js"
   },
   "repository": {
     "type": "git",
